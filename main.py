@@ -33,6 +33,13 @@ def main() -> None:
     dst = target_path()
     dst.parent.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(src, dst)
+    # Verify the copy: identical bytes, and a real PNG (magic header).
+    data = dst.read_bytes()
+    if data != src.read_bytes():
+        raise SystemExit("copy verification failed: bytes differ")
+    if not data.startswith(b"\x89PNG\r\n\x1a\n"):
+        raise SystemExit("copy verification failed: not a PNG file")
+    print(f"wrote {dst} ({len(data)} bytes, verified PNG)")
 
 
 if __name__ == "__main__":
